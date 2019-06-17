@@ -3,6 +3,7 @@ package com.chryl.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
+import org.tio.core.GroupContext;
 import org.tio.core.Tio;
 import org.tio.http.common.HttpRequest;
 import org.tio.http.common.HttpResponse;
@@ -12,6 +13,8 @@ import org.tio.websocket.common.WsSessionContext;
 import org.tio.websocket.server.handler.IWsMsgHandler;
 
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created By Chr on 2019/6/15.
@@ -19,8 +22,10 @@ import java.util.Objects;
 public class ShowcaseWsMsgHandler implements IWsMsgHandler {
     private static Logger log = LoggerFactory.getLogger(ShowcaseWsMsgHandler.class);
     public static final ShowcaseWsMsgHandler me = new ShowcaseWsMsgHandler();
+
     private ShowcaseWsMsgHandler() {
     }
+
     /**
      * 握手时走这个方法，业务可以在这里获取cookie，request参数等
      */
@@ -31,8 +36,11 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
         Tio.bindUser(channelContext, myname);
 //        channelContext.setUserid(myname);
         log.info("收到来自{}的ws握手包\r\n{}", clientip, request.toString());
+        System.out.println("=============================1");
+
         return httpResponse;
     }
+
     /**
      * @param httpRequest
      * @param httpResponse
@@ -50,22 +58,39 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
         WsResponse wsResponse = WsResponse.fromText(msg, ShowcaseServerConfig.CHARSET);
         //群发
         Tio.sendToGroup(channelContext.groupContext, Const.GROUP_ID, wsResponse);
+        System.out.println("=============================2");
+
+
+
+
+        //定时任务,查看该用户下的设备
+        TimeTask timeTask = new TimeTask(channelContext.groupContext, channelContext.userid, Const.GROUP_ID, wsResponse);
+        timer.schedule(timeTask, 0, 5000);
     }
+
     /**
      * 字节消息（binaryType = arraybuffer）过来后会走这个方法
      */
     @Override
     public Object onBytes(WsRequest wsRequest, byte[] bytes, ChannelContext channelContext) throws Exception {
+        System.out.println("=============================3");
+
+
         return null;
     }
+
     /**
      * 当客户端发close flag时，会走这个方法
      */
     @Override
     public Object onClose(WsRequest wsRequest, byte[] bytes, ChannelContext channelContext) throws Exception {
         Tio.remove(channelContext, "receive close flag");
+        System.out.println("=============================4");
+
+
         return null;
     }
+
     /*
      * 字符消息（binaryType = blob）过来后会走这个方法
      */
@@ -73,6 +98,8 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
     public Object onText(WsRequest wsRequest, String text, ChannelContext channelContext) throws Exception {
         WsSessionContext wsSessionContext = (WsSessionContext) channelContext.getAttribute();
         HttpRequest httpRequest = wsSessionContext.getHandshakeRequest();//获取websocket握手包
+        System.out.println("=============================5");
+
         if (log.isDebugEnabled()) {
             log.debug("握手包:{}", httpRequest);
         }
@@ -87,7 +114,43 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
         WsResponse wsResponse = WsResponse.fromText(msg, ShowcaseServerConfig.CHARSET);
         //群发
         Tio.sendToGroup(channelContext.groupContext, Const.GROUP_ID, wsResponse);
+
+
+
+
         //返回值是要发送给客户端的内容，一般都是返回null
         return null;
+    }
+
+
+    //定时发送给前端 数据
+    Timer timer = new Timer();
+
+
+    class TimeTask extends TimerTask {
+        GroupContext groupContext;
+        String channelContextUserId;
+        String userId;
+        WsResponse wsResponse;
+
+        public TimeTask() {
+        }
+
+        public TimeTask(GroupContext groupContext, String channelContextUserId, String userId, WsResponse wsResponse) {
+            this.groupContext = groupContext;
+            this.channelContextUserId = channelContextUserId;
+            this.userId = userId;
+            this.wsResponse = wsResponse;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Tio.sendToGroup(groupContext, Const.GROUP_ID, wsResponse);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }

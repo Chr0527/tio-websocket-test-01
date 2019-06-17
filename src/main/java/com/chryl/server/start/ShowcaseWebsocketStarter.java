@@ -63,7 +63,7 @@ public class ShowcaseWebsocketStarter {
     public static void main(String[] args) throws Exception {
         //启动http server，这个步骤不是必须的，但是为了用页面演示websocket，所以先启动http
 //        P.use("app.properties");
-//        if (P.getInt("start.http", 1) == 1) {
+//        if (P.getInt("websocketstart.http", 1) == 1) {
 //            HttpServerInit.init();
 //        }
         //启动websocket server

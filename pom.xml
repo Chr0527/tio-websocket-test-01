@@ -35,6 +35,10 @@
 			<artifactId>tio-websocket-server</artifactId>
 			<version>3.2.4.v20181218-RELEASE</version>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
