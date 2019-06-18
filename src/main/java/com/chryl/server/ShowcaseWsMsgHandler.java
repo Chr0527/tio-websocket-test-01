@@ -1,7 +1,9 @@
 package com.chryl.server;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.tio.core.ChannelContext;
 import org.tio.core.GroupContext;
 import org.tio.core.Tio;
@@ -16,9 +18,12 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.chryl.tcp.server.ServerHandler.map;
+
 /**
  * Created By Chr on 2019/6/15.
  */
+@Component
 public class ShowcaseWsMsgHandler implements IWsMsgHandler {
     private static Logger log = LoggerFactory.getLogger(ShowcaseWsMsgHandler.class);
     public static final ShowcaseWsMsgHandler me = new ShowcaseWsMsgHandler();
@@ -57,12 +62,11 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
         //用tio-websocket，服务器发送到客户端的Packet都是WsResponse
         WsResponse wsResponse = WsResponse.fromText(msg, ShowcaseServerConfig.CHARSET);
         //群发
-        Tio.sendToGroup(channelContext.groupContext, Const.GROUP_ID, wsResponse);
+//        Tio.sendToGroup(channelContext.groupContext, Const.GROUP_ID, wsResponse);
         System.out.println("=============================2");
 
 
-
-
+        //websocket
         //定时任务,查看该用户下的设备
         TimeTask timeTask = new TimeTask(channelContext.groupContext, channelContext.userid, Const.GROUP_ID, wsResponse);
         timer.schedule(timeTask, 0, 5000);
@@ -116,8 +120,6 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
         Tio.sendToGroup(channelContext.groupContext, Const.GROUP_ID, wsResponse);
 
 
-
-
         //返回值是要发送给客户端的内容，一般都是返回null
         return null;
     }
@@ -125,7 +127,6 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
 
     //定时发送给前端 数据
     Timer timer = new Timer();
-
 
     class TimeTask extends TimerTask {
         GroupContext groupContext;
@@ -146,7 +147,14 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
         @Override
         public void run() {
             try {
-                Tio.sendToGroup(groupContext, Const.GROUP_ID, wsResponse);
+                /**
+                 * 传入user,根据user拿出sb数据
+                 */
+                String msg = JSONObject.toJSONString(map.get("user-01"));
+                WsResponse wsR = WsResponse.fromText(msg, ShowcaseServerConfig.CHARSET);
+                Tio.sendToGroup(groupContext, Const.GROUP_ID, wsR);
+                //展示完移除
+                map.remove("user-01");
             } catch (Exception e) {
                 e.printStackTrace();
             }

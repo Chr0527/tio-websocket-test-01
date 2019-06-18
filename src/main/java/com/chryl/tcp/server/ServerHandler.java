@@ -3,9 +3,8 @@ package com.chryl.tcp.server;
 import com.alibaba.fastjson.JSON;
 import com.chryl.server.Const;
 import com.chryl.server.ShowcaseServerConfig;
-import com.chryl.server.ShowcaseWsMsgHandler;
+import com.chryl.server.po.SbInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.tio.core.ChannelContext;
 import org.tio.core.GroupContext;
 import org.tio.core.Tio;
@@ -21,8 +20,10 @@ import org.tio.websocket.server.handler.IWsMsgHandler;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,8 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class ServerHandler implements ServerAioHandler, IWsMsgHandler {
-    @Autowired
-    private ShowcaseWsMsgHandler showcaseWsMsgHandler;
+
 
     /**
      * 解码：
@@ -212,18 +212,34 @@ public class ServerHandler implements ServerAioHandler, IWsMsgHandler {
                 Tio.sendToUser(channelContext.groupContext, "client-01", requestPacket);
 
 
-                //websocket
-                String sbId = "";
-                if (s1.contains("6B")) {
-                    map.put(sbId, "1");
-                }
-
+                SbInfo sbInfo = new SbInfo();
+                SbInfo sbInfo2 = new SbInfo();
+                sbInfo.setSbId("sb-01");
+                sbInfo2.setSbId("sb-01");
+                sbInfo.setSbState("开启");
+                sbInfo2.setSbState("开启");
+                sbInfo.setSbDescription("厨房烟感报警器");
+                sbInfo2.setSbDescription("厨房烟感报警器");
+                Set<Object> set = new HashSet<>();
+                Set<Object> set2 = new HashSet<>();
+                set.add(sbInfo);
+                set2.add(sbInfo2);
+                map.put("user-01", set);
+                map.put("user-02", set2);
+//                CopyOnWriteArraySet<String> sessionSet = new CopyOnWriteArraySet<>();
+//                sessionSet.add("a");
+//                sessionSet.remove()
             }
         }
     }
 
-    //websocket
-    public static Map<String, String> map = new ConcurrentHashMap<>();
+    //websocket//user->many sb//key-userid,value-many sb
+    /**
+     * map:
+     * key(String):存储userid
+     * value(Set<Object>):存储设备sbInfo
+     */
+    public static Map<String, Set<Object>> map = new ConcurrentHashMap<>();
 
     //=========================================================================//
 
