@@ -129,6 +129,7 @@ public class ShowcaseWsMsgHandler implements IWsMsgHandler {
     Timer timer = new Timer();
 
     class TimeTask extends TimerTask {
+        //需要GroupContext,userid,channelcontextUserId,wsResp不需要
         GroupContext groupContext;
         String channelContextUserId;
         String userId;
