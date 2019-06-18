@@ -208,11 +208,11 @@ public class ServerHandler implements ServerAioHandler {
                 SbInfo sbInfo = new SbInfo();
                 SbInfo sbInfo2 = new SbInfo();
                 sbInfo.setSbId("sb-01");
-                sbInfo2.setSbId("sb-01");
+                sbInfo2.setSbId("sb-02");
                 sbInfo.setSbState("开启");
-                sbInfo2.setSbState("开启");
+                sbInfo2.setSbState("关闭");
                 sbInfo.setSbDescription("厨房烟感报警器");
-                sbInfo2.setSbDescription("厨房烟感报警器");
+                sbInfo2.setSbDescription("客厅烟感报警器");
                 Set<Object> set = new HashSet<>();
                 Set<Object> set2 = new HashSet<>();
                 set.add(sbInfo);
