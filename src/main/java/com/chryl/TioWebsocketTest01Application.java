@@ -10,9 +10,10 @@ public class TioWebsocketTest01Application {
 
     public static void main(String[] args) throws Exception {
         ShowcaseWebsocketStarter.start();
+
         SpringApplication.run(TioWebsocketTest01Application.class, args);
+
         ClientStarter.start();
-//        WebsocketStarter.start();
     }
 
 }
