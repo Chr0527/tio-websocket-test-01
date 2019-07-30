@@ -178,6 +178,9 @@ public class ServerHandler implements ServerAioHandler {
             String s = new String(body, RequestPacket.CHARSET);
 
             try {
+                /**
+                 * 没有此转换,暂时不出
+                 */
                 TestBean testBean = JSON.parseObject(s, TestBean.class);
                 System.err.println("FastJson：" + testBean.getComm());
             } catch (Exception e) {
@@ -201,7 +204,6 @@ public class ServerHandler implements ServerAioHandler {
                 //客户都按主动发送
                 Tio.bindUser(channelContext, "client-01");
                 Tio.sendToUser(channelContext.groupContext, "client-01", requestPacket);
-
 
 
                 //webSocket
